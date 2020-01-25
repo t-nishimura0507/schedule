@@ -1,8 +1,18 @@
 package schedule
 
 import (
+	"github.com/joho/godotenv"
+	"log"
+	"os"
 	"testing"
 )
+
+func before() {
+    err := godotenv.Load("config/test.env", os.Getenv("GOOGLE_CALENDAR_ID"))
+    if err != nil {
+    	log.Fatal("Error loadin .nev file..")
+	}
+}
 
 func TestGetSuccess(t *testing.T) {
 
