@@ -8,7 +8,6 @@ import (
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/calendar/v3"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
 	"regexp"
@@ -41,7 +40,7 @@ func Get(date string) ([]Schedule, error) {
 	// Get Calender Service.
 	service, err := calendar.New(client)
 	if err != nil {
-		log.Fatalf("Unable to retrieve Calendar client: %v", err)
+		return nil, fmt.Errorf("Unable to retrieve Calendar client: %v", err)
 	}
 
 	var calendarID = os.Getenv("GOOGLE_CALENDAR_ID")
@@ -136,7 +135,7 @@ func getTokenFromWeb(config *oauth2.Config) (*oauth2.Token, error) {
 		var authCode string
 
 		if _, err := fmt.Scan(&authCode); err != nil {
-			log.Fatalf("Unable to read authorization code: %v", err)
+			return nil, fmt.Errorf("Unable to read authorization code: %v", err)
 		}
 
 	//authCode := "4/vwHhC5qPP_v1k_qP1sHvV7HOEV9Whjhx0Pg5UTcEA_yb16ZUTOAcdH0"
@@ -148,11 +147,12 @@ func getTokenFromWeb(config *oauth2.Config) (*oauth2.Token, error) {
 	return token, nil
 }
 
-func saveToken(path string, token *oauth2.Token) {
+func saveToken(path string, token *oauth2.Token) error {
 	file, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
-		log.Fatalf("Unable to cache oauth token: %v", err)
+		return fmt.Errorf("Unable to cache oauth token: %v", err)
 	}
 	defer file.Close()
 	json.NewEncoder(file).Encode(token)
+	return nil
 }

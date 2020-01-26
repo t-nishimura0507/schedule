@@ -1,7 +1,6 @@
 package schedule
 
 import (
-	"fmt"
 	"github.com/joho/godotenv"
 	"log"
 	"os"
@@ -27,7 +26,7 @@ func TestGetSuccess(t *testing.T) {
 	if err != nil {
 		t.Error("ERROR Message:" + err.Error())
 	}
-	fmt.Printf("%v", schedules)
+	log.Printf("%v", schedules)
 }
 
 func TestGetRestSuccess(t *testing.T) {
@@ -42,7 +41,7 @@ func TestGetRestSuccess(t *testing.T) {
 	if err != nil {
 		t.Error("ERROR Message:" + err.Error())
 	}
-	fmt.Printf("%v", schedules)
+	log.Printf("%v", schedules)
 }
 
 func TestGetValidationError(t *testing.T) {
@@ -71,5 +70,5 @@ func TestGetUnsetEnvError(t *testing.T) {
 	if err == nil {
 		t.Error("Response is Success...")
 	}
-	fmt.Printf("ErrorMessage:" + err.Error())
+	t.Log(err.Error())
 }
