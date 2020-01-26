@@ -44,8 +44,13 @@ func Get(date string) ([]Schedule, error) {
 		log.Fatalf("Unable to retrieve Calendar client: %v", err)
 	}
 
+	var calendarID = os.Getenv("GOOGLE_CALENDAR_ID")
+	if calendarID == "" {
+		return nil, fmt.Errorf("Unset env `GOOGLE_CALENDAR_ID`.")
+	}
+
 	// Get Calendar Events.
-	events, err := service.Events.List(os.Getenv("GOOGLE_CALENDAR_ID")).
+	events, err := service.Events.List(calendarID).
 		SingleEvents(true).
 		TimeMax(date + `T23:59:59+09:00`).
 		TimeMin(date + `T00:00:00+09:00`).

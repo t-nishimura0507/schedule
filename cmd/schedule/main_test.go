@@ -58,3 +58,18 @@ func TestGetValidationError(t *testing.T) {
 		t.Error("Response is Success...")
 	}
 }
+
+func TestGetUnsetEnvError(t *testing.T) {
+
+	// param
+	var param = "2020-01-22"
+
+	// exec
+	_, err := Get(param)
+
+	// assertion
+	if err == nil {
+		t.Error("Response is Success...")
+	}
+	fmt.Printf("ErrorMessage:" + err.Error())
+}
