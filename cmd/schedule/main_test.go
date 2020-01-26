@@ -1,6 +1,7 @@
 package schedule
 
 import (
+	"fmt"
 	"github.com/joho/godotenv"
 	"log"
 	"os"
@@ -20,12 +21,28 @@ func TestGetSuccess(t *testing.T) {
 	var param = "2020-01-21"
 
 	// exec
-	_, err := Get(param)
+	schedules, err := Get(param)
 
 	// assertion
 	if err != nil {
-		t.Error("Response is Error...")
+		t.Error("ERROR Message:" + err.Error())
 	}
+	fmt.Printf("%v", schedules)
+}
+
+func TestGetRestSuccess(t *testing.T) {
+
+	// param
+	var param = "2020-01-22"
+
+	// exec
+	schedules, err := Get(param)
+
+	// assertion
+	if err != nil {
+		t.Error("ERROR Message:" + err.Error())
+	}
+	fmt.Printf("%v", schedules)
 }
 
 func TestGetValidationError(t *testing.T) {

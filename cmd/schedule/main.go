@@ -12,13 +12,15 @@ import (
 	"net/http"
 	"os"
 	"regexp"
-	"time"
 )
 
 // Schedule format.
 type Schedule struct {
-	task string
-	time string
+	Unit      string
+	Summary   string
+	Detail    string
+	StartTime string
+	EndTime   string
 }
 
 // Get a schedule for a specified date.
@@ -31,7 +33,10 @@ func Get(date string) ([]Schedule, error) {
 	}
 
 	// Get Client.
-	client := getClient()
+	client, err := getClient()
+	if err != nil {
+		return nil, err
+	}
 
 	// Get Calender Service.
 	service, err := calendar.New(client)
@@ -47,36 +52,28 @@ func Get(date string) ([]Schedule, error) {
 		OrderBy("startTime").
 		Do()
 	if err != nil {
-		log.Printf(err.Error())
-		return schedules, fmt.Errorf("errro...")
-		//log.Fatalf("Unable to get events..", err)
+		return schedules, err
 	}
 	if len(events.Items) == 0 {
 		fmt.Println("No upcoming events found. ")
 	} else {
 		for _, item := range events.Items {
-			date := item.Start.DateTime
-			if date == "" {
-				date = item.Start.Date
+			// スケジュールの単位（時間単位 or 日単位）を指定
+			var unit = "hour"
+			if item.Start.DateTime == "" && item.End.DateTime == "" {
+				unit = "day"
 			}
-			fmt.Printf("%v (%v)\n", item.Summary, date)
-			fmt.Printf("%v (%v)\n", item.Start.DateTime, date)
-			fmt.Printf("%v (%v)\n", item.End.DateTime, date)
+
+			schedules = append(schedules, Schedule{
+				unit,
+				item.Summary,
+				item.Description,
+				item.Start.DateTime,
+				item.End.DateTime,
+			})
 		}
 	}
 
-
-	// Create Response.
-	schedules = []Schedule{
-		{
-			"Study",
-			"20:00:00",
-		},
-		{
-			"Cycling",
-			"50:00:00",
-		},
-	}
 	return schedules, nil
 }
 
@@ -90,26 +87,29 @@ func isDateFormat(date string) bool {
 }
 
 // getClient
-func getClient() *http.Client {
+func getClient() (*http.Client, error) {
 	// credentials.jsonを読み込み
 	b, err := ioutil.ReadFile("../../config/credentials.json")
 	if err != nil {
-		log.Fatalf("Unable to read client secret file: %v", err)
+		return nil, fmt.Errorf("Unable to read client secret file: %v", err)
 	}
 
 	// クライアント作成
 	config, err := google.ConfigFromJSON(b, calendar.CalendarReadonlyScope)
 	if err != nil {
-		log.Fatalf("Unable to parse client secret file to cofing: %v", err)
+		return nil, fmt.Errorf("Unable to parse client secret file to cofing: %v", err)
 	}
 
 	tokenFile := "../../config/token.json"
 	token, err := tokenFromFile(tokenFile)
 	if err != nil {
-		token = getTokenFromWeb(config)
+		token, err = getTokenFromWeb(config)
+		if err != nil {
+			return nil, err
+		}
 		saveToken(tokenFile, token)
 	}
-	return config.Client(context.Background(), token)
+	return config.Client(context.Background(), token), nil
 }
 
 func tokenFromFile(fileName string) (*oauth2.Token, error) {
@@ -123,24 +123,24 @@ func tokenFromFile(fileName string) (*oauth2.Token, error) {
 	return token, err
 }
 
-func getTokenFromWeb(config *oauth2.Config) *oauth2.Token {
-/*
-	authURL := config.AuthCodeURL("state-token", oauth2.AccessTypeOffline)
+func getTokenFromWeb(config *oauth2.Config) (*oauth2.Token, error) {
+		authURL := config.AuthCodeURL("state-token", oauth2.AccessTypeOffline)
 
-	fmt.Printf("Go to the following link in your browser then type the "+
-		"authorization code: \n%v\n", authURL)
-	var authCode string
+		fmt.Printf("Go to the following link in your browser then type the "+
+			"authorization code: \n%v\n", authURL)
+		var authCode string
 
-	if _, err := fmt.Scan(&authCode); err != nil {
-		log.Fatalf("Unable to read authorization code: %v", err)
-	}
-*/
-    authCode := "4/vwHhC5qPP_v1k_qP1sHvV7HOEV9Whjhx0Pg5UTcEA_yb16ZUTOAcdH0"
+		if _, err := fmt.Scan(&authCode); err != nil {
+			log.Fatalf("Unable to read authorization code: %v", err)
+		}
+
+	//authCode := "4/vwHhC5qPP_v1k_qP1sHvV7HOEV9Whjhx0Pg5UTcEA_yb16ZUTOAcdH0"
+
 	token, err := config.Exchange(context.TODO(), authCode)
 	if err != nil {
-		log.Fatalf("Unable to retrieve token from web: %v", err)
+		return nil, fmt.Errorf("Unable to retrieve token from web: %v", err)
 	}
-	return token
+	return token, nil
 }
 
 func saveToken(path string, token *oauth2.Token) {
@@ -150,21 +150,4 @@ func saveToken(path string, token *oauth2.Token) {
 	}
 	defer file.Close()
 	json.NewEncoder(file).Encode(token)
-}
-
-func getDuration(startTime string, endTime string) time.Duration {
-	// Duration..
-	st, err := time.Parse(time.RFC3339, startTime)
-	if err != nil {
-		log.Fatal(err)
-		panic(err)
-	}
-
-	et, err := time.Parse(time.RFC3339, endTime)
-	if err != nil {
-		log.Fatal(err)
-		panic(err)
-	}
-
-	return et.Sub(st)
 }
