@@ -44,6 +44,21 @@ func TestGetRestSuccess(t *testing.T) {
 	log.Printf("%v", schedules)
 }
 
+func TestGetHoliDaySuccess(t *testing.T) {
+
+	// param
+	var param = "2020-01-01"
+
+	// exec
+	schedules, err := Get(param)
+
+	// assertion
+	if err != nil {
+		t.Error("ERROR Message:" + err.Error())
+	}
+	log.Printf("%v", schedules)
+}
+
 func TestGetValidationError(t *testing.T) {
 
 	// param
