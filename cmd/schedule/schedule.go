@@ -46,7 +46,7 @@ func Get(date string) ([]Schedule, error) {
 	}
 
 	// Get Calendar Events.
-	holidyEvents, err := service.Events.List(holidayCalendarID).
+	holidayEvents, err := service.Events.List(holidayCalendarID).
 		SingleEvents(true).
 		TimeMax(date + `T23:59:59+09:00`).
 		TimeMin(date + `T00:00:00+09:00`).
@@ -55,10 +55,10 @@ func Get(date string) ([]Schedule, error) {
 	if err != nil {
 		return schedules, err
 	}
-	if len(holidyEvents.Items) == 0 {
+	if len(holidayEvents.Items) == 0 {
 		fmt.Println("No upcoming events found. ")
 	} else {
-		for _, item := range holidyEvents.Items {
+		for _, item := range holidayEvents.Items {
 			schedules = append(schedules, Schedule{
 				"day",
 				item.Summary,

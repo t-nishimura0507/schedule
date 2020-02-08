@@ -44,7 +44,7 @@ func TestGetRestSuccess(t *testing.T) {
 	log.Printf("%v", schedules)
 }
 
-func TestGetHoliDaySuccess(t *testing.T) {
+func TestGetHolidaySuccess(t *testing.T) {
 
 	// param
 	var param = "2020-01-01"

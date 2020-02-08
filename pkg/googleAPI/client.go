@@ -7,26 +7,20 @@ import (
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/calendar/v3"
-	"io/ioutil"
 	"net/http"
 	"os"
 )
 
-
 // GetClient
 func GetClient() (*http.Client, error) {
-	// credentials.jsonを読み込み
-	b, err := ioutil.ReadFile("../../config/credentials.json")
-	if err != nil {
-		return nil, fmt.Errorf("Unable to read client secret file: %v", err)
-	}
 
 	// クライアント作成
-	config, err := google.ConfigFromJSON(b, calendar.CalendarReadonlyScope)
+	config, err := google.ConfigFromJSON(getCredentials(), calendar.CalendarReadonlyScope)
 	if err != nil {
 		return nil, fmt.Errorf("Unable to parse client secret file to cofing: %v", err)
 	}
 
+	// トークン
 	tokenFile := "../../config/token.json"
 	token, err := tokenFromFile(tokenFile)
 	if err != nil {
